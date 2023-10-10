@@ -19,3 +19,39 @@
 
 # Go workspace file
 go.work
+
+tmp/
+
+# Exclude coverage files.
+cover.*
+
+tags
+
+.DS_store
+
+# Ignore generated packrd files.
+packrd/
+
+# Ignore generated entities.
+entity/
+
+# Ignore all .env file except .env.sample
+.env*
+!.env.sample
+
+
+*.[568ao]
+*.ao
+*.so
+*.pyc
+._*
+.nfs.*
+[568a].out
+*~
+*.orig
+core
+_obj
+_test
+_testmain.go
+protoc-gen-go/testdata/multi/*.pb.go
+_conformance/_conformance
