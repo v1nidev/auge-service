@@ -2,28 +2,31 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"fmt"
 	"os"
+	"context"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/v1nidev/auge-service/graph"
+	"github.com/v1nidev/auge-service/ent"
+	"github.com/v1nidev/auge-service/ent/migrate"
+
+	_ "github.com/lib/pq"
 )
 
 const defaultPort = "3000"
 
 func main() {
-	port := os.Getenv("PORT")
+	dbName := os.Getenv("DB_NAME")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbConnectionString := fmt.Sprintf("host=db port=5432 user=%s dbname=%s password=%s sslmode=disable", dbUser, dbName, dbPassword)
 
-	if port == "" {
-		port = defaultPort
+	client, err := ent.Open("postgres", dbConnectionString)
+	if err != nil {
+			log.Fatalf("failed opening connection to postgres: %v", err)
 	}
-
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
-
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
-
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	defer client.Close()
+	// Run the auto migration tool.
+	if err := client.Schema.Create(context.Background(), migrate.WithGlobalUniqueID(true)); err != nil {
+			log.Fatalf("failed creating schema resources: %v", err)
+	}
 }
