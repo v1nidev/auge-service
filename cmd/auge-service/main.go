@@ -11,8 +11,6 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
 
-	"github.com/v1nidev/auge-service/ent"
-	"github.com/v1nidev/auge-service/ent/migrate"
 	"github.com/v1nidev/auge-service/internal/member"
 
 	_ "github.com/lib/pq"
@@ -50,14 +48,5 @@ func main() {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbConnectionString := fmt.Sprintf("host=db port=5432 user=%s dbname=%s password=%s sslmode=disable", dbUser, dbName, dbPassword)
 
-	client, err := ent.Open("postgres", dbConnectionString)
-	if err != nil {
-			log.Fatalf("failed opening connection to postgres: %v", err)
-	}
-	defer client.Close()
-	// Run the auto migration tool.
-	if err := client.Schema.Create(context.Background(), migrate.WithGlobalUniqueID(true)); err != nil {
-			log.Fatalf("failed creating schema resources: %v", err)
-	}
 }
 
