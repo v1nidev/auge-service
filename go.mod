@@ -8,4 +8,7 @@ require (
 	github.com/lib/pq v1.10.9
 )
 
-require github.com/ajg/form v1.5.1 // indirect
+require (
+	github.com/ajg/form v1.5.1 // indirect
+	github.com/go-jet/jet/v2 v2.10.1 // indirect
+)
