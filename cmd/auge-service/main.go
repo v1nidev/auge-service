@@ -2,23 +2,22 @@ package main
 
 import (
 	"log"
-	"fmt"
 	"os"
-	"context"
 	"net/http"
+	"database/sql"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
 
+	"github.com/v1nidev/auge-service/database"
 	"github.com/v1nidev/auge-service/internal/member"
-
-	_ "github.com/lib/pq"
+	"github.com/v1nidev/auge-service/internal/package"
 )
 
 const defaultPort = "3000"
 
-func Routes() *chi.Mux {
+func Routes(db *sql.DB) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(
 		render.SetContentType(render.ContentTypeJSON),
@@ -26,12 +25,19 @@ func Routes() *chi.Mux {
 	)
 
 	router.Mount("/member", member.Routes())
+	router.Mount("/package", gymPackage.Routes(gymPackage.ConfigPackageDi(db)))
 
 	return router
 }
 
 func main() {
-	router := Routes()
+	db, err := database.Open()
+	defer db.Close()
+	if err != nil {
+		os.Exit(1)
+	}
+
+	router := Routes(db)
 	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
 		log.Printf("%s %s\n", method, route)
 		return nil
@@ -43,10 +49,6 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(":3000", router))
 
-	dbName := os.Getenv("DB_NAME")
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbConnectionString := fmt.Sprintf("host=db port=5432 user=%s dbname=%s password=%s sslmode=disable", dbUser, dbName, dbPassword)
 
 }
 
