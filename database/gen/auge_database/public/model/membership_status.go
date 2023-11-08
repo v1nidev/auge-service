@@ -7,12 +7,7 @@
 
 package model
 
-import (
-	"github.com/google/uuid"
-)
-
-type EmergencyPhone struct {
-	PhoneNumber *string
-	Name        *string
-	IDMember    uuid.UUID `sql:"primary_key"`
+type MembershipStatus struct {
+	ID          int32 `sql:"primary_key"`
+	Description string
 }

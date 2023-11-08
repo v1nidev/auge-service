@@ -7,7 +7,8 @@
 
 package model
 
-type MembershipStatus struct {
-	ID     float64 `sql:"primary_key"`
-	Status string
+type Package struct {
+	Price            float64
+	ValidityInMonths int32 `sql:"primary_key"`
+	IDPackageType    int32 `sql:"primary_key"`
 }

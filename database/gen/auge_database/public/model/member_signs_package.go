@@ -13,6 +13,6 @@ import (
 
 type MemberSignsPackage struct {
 	IDMember         uuid.UUID `sql:"primary_key"`
-	IDPackageType    float64   `sql:"primary_key"`
-	ValidityInMonths float64   `sql:"primary_key"`
+	IDPackageType    int32     `sql:"primary_key"`
+	ValidityInMonths int32     `sql:"primary_key"`
 }

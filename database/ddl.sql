@@ -14,7 +14,7 @@ ALTER TABLE public.person OWNER TO admin;
 CREATE TABLE public.member (
 	sex character(1) NOT NULL,
 	email character varying(255) NOT NULL,
-	id_membership_status numeric(2) NOT NULL,
+	id_membership_status integer NOT NULL,
 -- 	id uuid NOT NULL,
 -- 	name text NOT NULL,
 	CONSTRAINT member_sex_check CHECK (sex in ('M', 'F')),
@@ -29,8 +29,8 @@ ALTER TABLE public.member OWNER TO admin;
 -- DROP TABLE IF EXISTS public.phone CASCADE;
 CREATE TABLE public.phone (
 	id_person uuid NOT NULL,
-	phone_number character varying(20) NOT NULL,
-	CONSTRAINT phone_person_id_phone_pk PRIMARY KEY (id_person,phone_number)
+	number character varying(20) NOT NULL,
+	CONSTRAINT phone_person_id_phone_pk PRIMARY KEY (id_person,number)
 );
 -- ddl-end --
 ALTER TABLE public.phone OWNER TO admin;
@@ -39,7 +39,7 @@ ALTER TABLE public.phone OWNER TO admin;
 -- object: public.emergency_phone | type: TABLE --
 -- DROP TABLE IF EXISTS public.emergency_phone CASCADE;
 CREATE TABLE public.emergency_phone (
-	phone_number character varying(20),
+	number character varying(20),
 	name text,
 	id_member uuid NOT NULL,
 	CONSTRAINT emergency_phone_pk PRIMARY KEY (id_member)
@@ -63,8 +63,8 @@ ALTER TABLE public.emergency_phone ADD CONSTRAINT emergency_phone_uq UNIQUE (id_
 -- object: public.membership_status | type: TABLE --
 -- DROP TABLE IF EXISTS public.membership_status CASCADE;
 CREATE TABLE public.membership_status (
-	id numeric(2) NOT NULL,
-	status character varying(20) NOT NULL DEFAULT 'inactive',
+	id integer NOT NULL,
+	description character varying(20) NOT NULL DEFAULT 'inactive',
 	CONSTRAINT membership_status_pk PRIMARY KEY (id)
 );
 -- ddl-end --
@@ -94,9 +94,10 @@ ALTER TABLE public.employee OWNER TO admin;
 -- object: public.package_type | type: TABLE --
 -- DROP TABLE IF EXISTS public.package_type CASCADE;
 CREATE TABLE public.package_type (
-	id numeric(3) NOT NULL,
-	package_type_description character varying(30) NOT NULL,
-	CONSTRAINT package_type_pk PRIMARY KEY (id)
+	id integer NOT NULL,
+	description character varying(30) NOT NULL,
+	CONSTRAINT package_type_pk PRIMARY KEY (id),
+	CONSTRAINT package_type_description_key UNIQUE (description)
 );
 -- ddl-end --
 ALTER TABLE public.package_type OWNER TO admin;
@@ -106,8 +107,8 @@ ALTER TABLE public.package_type OWNER TO admin;
 -- DROP TABLE IF EXISTS public.package CASCADE;
 CREATE TABLE public.package (
 	price numeric(10,2) NOT NULL,
-	validity_in_months numeric(3) NOT NULL,
-	id_package_type numeric(3) NOT NULL,
+	validity_in_months integer NOT NULL,
+	id_package_type integer NOT NULL,
 	CONSTRAINT package_pk PRIMARY KEY (id_package_type,validity_in_months)
 );
 -- ddl-end --
@@ -118,8 +119,8 @@ ALTER TABLE public.package OWNER TO admin;
 -- DROP TABLE IF EXISTS public.member_signs_package CASCADE;
 CREATE TABLE public.member_signs_package (
 	id_member uuid NOT NULL,
-	id_package_type numeric(3) NOT NULL,
-	validity_in_months numeric(3) NOT NULL,
+	id_package_type integer NOT NULL,
+	validity_in_months integer NOT NULL,
 	CONSTRAINT member_signs_package_pk PRIMARY KEY (id_member,id_package_type,validity_in_months)
 );
 -- ddl-end --

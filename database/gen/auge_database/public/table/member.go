@@ -8,20 +8,20 @@
 package table
 
 import (
-	"github.com/go-jet/jet/v2/postgres"
+	"github.com/go-jet/jet/postgres"
 )
 
-var Member = newMemberTable("public", "member", "")
+var Member = newMemberTable()
 
 type memberTable struct {
 	postgres.Table
 
-	// Columns
+	//Columns
 	ID                 postgres.ColumnString
 	Name               postgres.ColumnString
 	Sex                postgres.ColumnString
 	Email              postgres.ColumnString
-	IDMembershipStatus postgres.ColumnFloat
+	IDMembershipStatus postgres.ColumnInteger
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -34,45 +34,32 @@ type MemberTable struct {
 }
 
 // AS creates new MemberTable with assigned alias
-func (a MemberTable) AS(alias string) *MemberTable {
-	return newMemberTable(a.SchemaName(), a.TableName(), alias)
+func (a *MemberTable) AS(alias string) *MemberTable {
+	aliasTable := newMemberTable()
+	aliasTable.Table.AS(alias)
+	return aliasTable
 }
 
-// Schema creates new MemberTable with assigned schema name
-func (a MemberTable) FromSchema(schemaName string) *MemberTable {
-	return newMemberTable(schemaName, a.TableName(), a.Alias())
-}
-
-// WithPrefix creates new MemberTable with assigned table prefix
-func (a MemberTable) WithPrefix(prefix string) *MemberTable {
-	return newMemberTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
-}
-
-// WithSuffix creates new MemberTable with assigned table suffix
-func (a MemberTable) WithSuffix(suffix string) *MemberTable {
-	return newMemberTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
-}
-
-func newMemberTable(schemaName, tableName, alias string) *MemberTable {
+func newMemberTable() *MemberTable {
 	return &MemberTable{
-		memberTable: newMemberTableImpl(schemaName, tableName, alias),
-		EXCLUDED:    newMemberTableImpl("", "excluded", ""),
+		memberTable: newMemberTableImpl("public", "member"),
+		EXCLUDED:    newMemberTableImpl("", "excluded"),
 	}
 }
 
-func newMemberTableImpl(schemaName, tableName, alias string) memberTable {
+func newMemberTableImpl(schemaName, tableName string) memberTable {
 	var (
 		IDColumn                 = postgres.StringColumn("id")
 		NameColumn               = postgres.StringColumn("name")
 		SexColumn                = postgres.StringColumn("sex")
 		EmailColumn              = postgres.StringColumn("email")
-		IDMembershipStatusColumn = postgres.FloatColumn("id_membership_status")
+		IDMembershipStatusColumn = postgres.IntegerColumn("id_membership_status")
 		allColumns               = postgres.ColumnList{IDColumn, NameColumn, SexColumn, EmailColumn, IDMembershipStatusColumn}
 		mutableColumns           = postgres.ColumnList{NameColumn, SexColumn, EmailColumn, IDMembershipStatusColumn}
 	)
 
 	return memberTable{
-		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
+		Table: postgres.NewTable(schemaName, tableName, allColumns...),
 
 		//Columns
 		ID:                 IDColumn,

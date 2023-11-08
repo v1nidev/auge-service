@@ -7,8 +7,8 @@ import (
 
 	// dot import so go code would resemble as much as native SQL
 	// dot import is not mandatory
-	. "github.com/v1nidev/auge-service/.gen/auge_database/public/table"
-	"github.com/v1nidev/auge-service/.gen/auge_database/public/model"
+	. "github.com/v1nidev/auge-service/database/gen/auge_database/public/table"
+	"github.com/v1nidev/auge-service/database/gen/auge_database/public/model"
 )
 
 type PackageRepository struct {

@@ -16,5 +16,5 @@ type Member struct {
 	Name               string
 	Sex                string
 	Email              string
-	IDMembershipStatus float64
+	IDMembershipStatus int32
 }

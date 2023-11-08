@@ -7,7 +7,12 @@
 
 package model
 
-type PackageType struct {
-	ID                     float64 `sql:"primary_key"`
-	PackageTypeDescription string
+import (
+	"github.com/google/uuid"
+)
+
+type EmergencyPhone struct {
+	Number   *string
+	Name     *string
+	IDMember uuid.UUID `sql:"primary_key"`
 }
