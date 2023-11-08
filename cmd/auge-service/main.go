@@ -31,11 +31,6 @@ func Routes(db *sql.DB) *chi.Mux {
 }
 
 func main() {
-	generatorErr := database.Generate()
-	if generatorErr != nil {
-		os.Exit(1)
-	}
-
 	db, connectionErr := database.Open()
 	defer db.Close()
 	if connectionErr != nil {

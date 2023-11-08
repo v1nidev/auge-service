@@ -8,15 +8,15 @@
 package table
 
 import (
-	"github.com/go-jet/jet/postgres"
+	"github.com/go-jet/jet/v2/postgres"
 )
 
-var MemberSignsPackage = newMemberSignsPackageTable()
+var MemberSignsPackage = newMemberSignsPackageTable("public", "member_signs_package", "")
 
 type memberSignsPackageTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	IDMember         postgres.ColumnString
 	IDPackageType    postgres.ColumnInteger
 	ValidityInMonths postgres.ColumnInteger
@@ -32,20 +32,33 @@ type MemberSignsPackageTable struct {
 }
 
 // AS creates new MemberSignsPackageTable with assigned alias
-func (a *MemberSignsPackageTable) AS(alias string) *MemberSignsPackageTable {
-	aliasTable := newMemberSignsPackageTable()
-	aliasTable.Table.AS(alias)
-	return aliasTable
+func (a MemberSignsPackageTable) AS(alias string) *MemberSignsPackageTable {
+	return newMemberSignsPackageTable(a.SchemaName(), a.TableName(), alias)
 }
 
-func newMemberSignsPackageTable() *MemberSignsPackageTable {
+// Schema creates new MemberSignsPackageTable with assigned schema name
+func (a MemberSignsPackageTable) FromSchema(schemaName string) *MemberSignsPackageTable {
+	return newMemberSignsPackageTable(schemaName, a.TableName(), a.Alias())
+}
+
+// WithPrefix creates new MemberSignsPackageTable with assigned table prefix
+func (a MemberSignsPackageTable) WithPrefix(prefix string) *MemberSignsPackageTable {
+	return newMemberSignsPackageTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
+}
+
+// WithSuffix creates new MemberSignsPackageTable with assigned table suffix
+func (a MemberSignsPackageTable) WithSuffix(suffix string) *MemberSignsPackageTable {
+	return newMemberSignsPackageTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
+}
+
+func newMemberSignsPackageTable(schemaName, tableName, alias string) *MemberSignsPackageTable {
 	return &MemberSignsPackageTable{
-		memberSignsPackageTable: newMemberSignsPackageTableImpl("public", "member_signs_package"),
-		EXCLUDED:                newMemberSignsPackageTableImpl("", "excluded"),
+		memberSignsPackageTable: newMemberSignsPackageTableImpl(schemaName, tableName, alias),
+		EXCLUDED:                newMemberSignsPackageTableImpl("", "excluded", ""),
 	}
 }
 
-func newMemberSignsPackageTableImpl(schemaName, tableName string) memberSignsPackageTable {
+func newMemberSignsPackageTableImpl(schemaName, tableName, alias string) memberSignsPackageTable {
 	var (
 		IDMemberColumn         = postgres.StringColumn("id_member")
 		IDPackageTypeColumn    = postgres.IntegerColumn("id_package_type")
@@ -55,7 +68,7 @@ func newMemberSignsPackageTableImpl(schemaName, tableName string) memberSignsPac
 	)
 
 	return memberSignsPackageTable{
-		Table: postgres.NewTable(schemaName, tableName, allColumns...),
+		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
 		IDMember:         IDMemberColumn,

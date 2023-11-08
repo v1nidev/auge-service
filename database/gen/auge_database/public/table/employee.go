@@ -8,15 +8,15 @@
 package table
 
 import (
-	"github.com/go-jet/jet/postgres"
+	"github.com/go-jet/jet/v2/postgres"
 )
 
-var Employee = newEmployeeTable()
+var Employee = newEmployeeTable("public", "employee", "")
 
 type employeeTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	ID       postgres.ColumnString
 	Name     postgres.ColumnString
 	Birthday postgres.ColumnDate
@@ -32,20 +32,33 @@ type EmployeeTable struct {
 }
 
 // AS creates new EmployeeTable with assigned alias
-func (a *EmployeeTable) AS(alias string) *EmployeeTable {
-	aliasTable := newEmployeeTable()
-	aliasTable.Table.AS(alias)
-	return aliasTable
+func (a EmployeeTable) AS(alias string) *EmployeeTable {
+	return newEmployeeTable(a.SchemaName(), a.TableName(), alias)
 }
 
-func newEmployeeTable() *EmployeeTable {
+// Schema creates new EmployeeTable with assigned schema name
+func (a EmployeeTable) FromSchema(schemaName string) *EmployeeTable {
+	return newEmployeeTable(schemaName, a.TableName(), a.Alias())
+}
+
+// WithPrefix creates new EmployeeTable with assigned table prefix
+func (a EmployeeTable) WithPrefix(prefix string) *EmployeeTable {
+	return newEmployeeTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
+}
+
+// WithSuffix creates new EmployeeTable with assigned table suffix
+func (a EmployeeTable) WithSuffix(suffix string) *EmployeeTable {
+	return newEmployeeTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
+}
+
+func newEmployeeTable(schemaName, tableName, alias string) *EmployeeTable {
 	return &EmployeeTable{
-		employeeTable: newEmployeeTableImpl("public", "employee"),
-		EXCLUDED:      newEmployeeTableImpl("", "excluded"),
+		employeeTable: newEmployeeTableImpl(schemaName, tableName, alias),
+		EXCLUDED:      newEmployeeTableImpl("", "excluded", ""),
 	}
 }
 
-func newEmployeeTableImpl(schemaName, tableName string) employeeTable {
+func newEmployeeTableImpl(schemaName, tableName, alias string) employeeTable {
 	var (
 		IDColumn       = postgres.StringColumn("id")
 		NameColumn     = postgres.StringColumn("name")
@@ -55,7 +68,7 @@ func newEmployeeTableImpl(schemaName, tableName string) employeeTable {
 	)
 
 	return employeeTable{
-		Table: postgres.NewTable(schemaName, tableName, allColumns...),
+		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
 		ID:       IDColumn,

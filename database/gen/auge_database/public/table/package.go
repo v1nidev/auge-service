@@ -8,15 +8,15 @@
 package table
 
 import (
-	"github.com/go-jet/jet/postgres"
+	"github.com/go-jet/jet/v2/postgres"
 )
 
-var Package = newPackageTable()
+var Package = newPackageTable("public", "package", "")
 
 type packageTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	Price            postgres.ColumnFloat
 	ValidityInMonths postgres.ColumnInteger
 	IDPackageType    postgres.ColumnInteger
@@ -32,20 +32,33 @@ type PackageTable struct {
 }
 
 // AS creates new PackageTable with assigned alias
-func (a *PackageTable) AS(alias string) *PackageTable {
-	aliasTable := newPackageTable()
-	aliasTable.Table.AS(alias)
-	return aliasTable
+func (a PackageTable) AS(alias string) *PackageTable {
+	return newPackageTable(a.SchemaName(), a.TableName(), alias)
 }
 
-func newPackageTable() *PackageTable {
+// Schema creates new PackageTable with assigned schema name
+func (a PackageTable) FromSchema(schemaName string) *PackageTable {
+	return newPackageTable(schemaName, a.TableName(), a.Alias())
+}
+
+// WithPrefix creates new PackageTable with assigned table prefix
+func (a PackageTable) WithPrefix(prefix string) *PackageTable {
+	return newPackageTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
+}
+
+// WithSuffix creates new PackageTable with assigned table suffix
+func (a PackageTable) WithSuffix(suffix string) *PackageTable {
+	return newPackageTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
+}
+
+func newPackageTable(schemaName, tableName, alias string) *PackageTable {
 	return &PackageTable{
-		packageTable: newPackageTableImpl("public", "package"),
-		EXCLUDED:     newPackageTableImpl("", "excluded"),
+		packageTable: newPackageTableImpl(schemaName, tableName, alias),
+		EXCLUDED:     newPackageTableImpl("", "excluded", ""),
 	}
 }
 
-func newPackageTableImpl(schemaName, tableName string) packageTable {
+func newPackageTableImpl(schemaName, tableName, alias string) packageTable {
 	var (
 		PriceColumn            = postgres.FloatColumn("price")
 		ValidityInMonthsColumn = postgres.IntegerColumn("validity_in_months")
@@ -55,7 +68,7 @@ func newPackageTableImpl(schemaName, tableName string) packageTable {
 	)
 
 	return packageTable{
-		Table: postgres.NewTable(schemaName, tableName, allColumns...),
+		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
 		Price:            PriceColumn,

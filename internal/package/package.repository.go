@@ -17,8 +17,7 @@ type PackageRepository struct {
 func NewPackageRepository(db *sql.DB) PackageRepository {
 	getAllPackages := func()  {
 		statement := SELECT(
-			PackageType.ID,
-			PackageType.PackageTypeDescription,
+			PackageType.AllColumns,
 		).FROM(PackageType)
 
 		// query, _ := statement.Sql()

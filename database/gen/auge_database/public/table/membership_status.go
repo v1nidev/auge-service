@@ -8,15 +8,15 @@
 package table
 
 import (
-	"github.com/go-jet/jet/postgres"
+	"github.com/go-jet/jet/v2/postgres"
 )
 
-var MembershipStatus = newMembershipStatusTable()
+var MembershipStatus = newMembershipStatusTable("public", "membership_status", "")
 
 type membershipStatusTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	ID          postgres.ColumnInteger
 	Description postgres.ColumnString
 
@@ -31,20 +31,33 @@ type MembershipStatusTable struct {
 }
 
 // AS creates new MembershipStatusTable with assigned alias
-func (a *MembershipStatusTable) AS(alias string) *MembershipStatusTable {
-	aliasTable := newMembershipStatusTable()
-	aliasTable.Table.AS(alias)
-	return aliasTable
+func (a MembershipStatusTable) AS(alias string) *MembershipStatusTable {
+	return newMembershipStatusTable(a.SchemaName(), a.TableName(), alias)
 }
 
-func newMembershipStatusTable() *MembershipStatusTable {
+// Schema creates new MembershipStatusTable with assigned schema name
+func (a MembershipStatusTable) FromSchema(schemaName string) *MembershipStatusTable {
+	return newMembershipStatusTable(schemaName, a.TableName(), a.Alias())
+}
+
+// WithPrefix creates new MembershipStatusTable with assigned table prefix
+func (a MembershipStatusTable) WithPrefix(prefix string) *MembershipStatusTable {
+	return newMembershipStatusTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
+}
+
+// WithSuffix creates new MembershipStatusTable with assigned table suffix
+func (a MembershipStatusTable) WithSuffix(suffix string) *MembershipStatusTable {
+	return newMembershipStatusTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
+}
+
+func newMembershipStatusTable(schemaName, tableName, alias string) *MembershipStatusTable {
 	return &MembershipStatusTable{
-		membershipStatusTable: newMembershipStatusTableImpl("public", "membership_status"),
-		EXCLUDED:              newMembershipStatusTableImpl("", "excluded"),
+		membershipStatusTable: newMembershipStatusTableImpl(schemaName, tableName, alias),
+		EXCLUDED:              newMembershipStatusTableImpl("", "excluded", ""),
 	}
 }
 
-func newMembershipStatusTableImpl(schemaName, tableName string) membershipStatusTable {
+func newMembershipStatusTableImpl(schemaName, tableName, alias string) membershipStatusTable {
 	var (
 		IDColumn          = postgres.IntegerColumn("id")
 		DescriptionColumn = postgres.StringColumn("description")
@@ -53,7 +66,7 @@ func newMembershipStatusTableImpl(schemaName, tableName string) membershipStatus
 	)
 
 	return membershipStatusTable{
-		Table: postgres.NewTable(schemaName, tableName, allColumns...),
+		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
 		ID:          IDColumn,

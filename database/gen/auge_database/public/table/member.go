@@ -8,15 +8,15 @@
 package table
 
 import (
-	"github.com/go-jet/jet/postgres"
+	"github.com/go-jet/jet/v2/postgres"
 )
 
-var Member = newMemberTable()
+var Member = newMemberTable("public", "member", "")
 
 type memberTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	ID                 postgres.ColumnString
 	Name               postgres.ColumnString
 	Sex                postgres.ColumnString
@@ -34,20 +34,33 @@ type MemberTable struct {
 }
 
 // AS creates new MemberTable with assigned alias
-func (a *MemberTable) AS(alias string) *MemberTable {
-	aliasTable := newMemberTable()
-	aliasTable.Table.AS(alias)
-	return aliasTable
+func (a MemberTable) AS(alias string) *MemberTable {
+	return newMemberTable(a.SchemaName(), a.TableName(), alias)
 }
 
-func newMemberTable() *MemberTable {
+// Schema creates new MemberTable with assigned schema name
+func (a MemberTable) FromSchema(schemaName string) *MemberTable {
+	return newMemberTable(schemaName, a.TableName(), a.Alias())
+}
+
+// WithPrefix creates new MemberTable with assigned table prefix
+func (a MemberTable) WithPrefix(prefix string) *MemberTable {
+	return newMemberTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
+}
+
+// WithSuffix creates new MemberTable with assigned table suffix
+func (a MemberTable) WithSuffix(suffix string) *MemberTable {
+	return newMemberTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
+}
+
+func newMemberTable(schemaName, tableName, alias string) *MemberTable {
 	return &MemberTable{
-		memberTable: newMemberTableImpl("public", "member"),
-		EXCLUDED:    newMemberTableImpl("", "excluded"),
+		memberTable: newMemberTableImpl(schemaName, tableName, alias),
+		EXCLUDED:    newMemberTableImpl("", "excluded", ""),
 	}
 }
 
-func newMemberTableImpl(schemaName, tableName string) memberTable {
+func newMemberTableImpl(schemaName, tableName, alias string) memberTable {
 	var (
 		IDColumn                 = postgres.StringColumn("id")
 		NameColumn               = postgres.StringColumn("name")
@@ -59,7 +72,7 @@ func newMemberTableImpl(schemaName, tableName string) memberTable {
 	)
 
 	return memberTable{
-		Table: postgres.NewTable(schemaName, tableName, allColumns...),
+		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
 		ID:                 IDColumn,

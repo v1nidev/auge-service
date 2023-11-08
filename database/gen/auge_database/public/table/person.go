@@ -8,15 +8,15 @@
 package table
 
 import (
-	"github.com/go-jet/jet/postgres"
+	"github.com/go-jet/jet/v2/postgres"
 )
 
-var Person = newPersonTable()
+var Person = newPersonTable("public", "person", "")
 
 type personTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	ID   postgres.ColumnString
 	Name postgres.ColumnString
 
@@ -31,20 +31,33 @@ type PersonTable struct {
 }
 
 // AS creates new PersonTable with assigned alias
-func (a *PersonTable) AS(alias string) *PersonTable {
-	aliasTable := newPersonTable()
-	aliasTable.Table.AS(alias)
-	return aliasTable
+func (a PersonTable) AS(alias string) *PersonTable {
+	return newPersonTable(a.SchemaName(), a.TableName(), alias)
 }
 
-func newPersonTable() *PersonTable {
+// Schema creates new PersonTable with assigned schema name
+func (a PersonTable) FromSchema(schemaName string) *PersonTable {
+	return newPersonTable(schemaName, a.TableName(), a.Alias())
+}
+
+// WithPrefix creates new PersonTable with assigned table prefix
+func (a PersonTable) WithPrefix(prefix string) *PersonTable {
+	return newPersonTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
+}
+
+// WithSuffix creates new PersonTable with assigned table suffix
+func (a PersonTable) WithSuffix(suffix string) *PersonTable {
+	return newPersonTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
+}
+
+func newPersonTable(schemaName, tableName, alias string) *PersonTable {
 	return &PersonTable{
-		personTable: newPersonTableImpl("public", "person"),
-		EXCLUDED:    newPersonTableImpl("", "excluded"),
+		personTable: newPersonTableImpl(schemaName, tableName, alias),
+		EXCLUDED:    newPersonTableImpl("", "excluded", ""),
 	}
 }
 
-func newPersonTableImpl(schemaName, tableName string) personTable {
+func newPersonTableImpl(schemaName, tableName, alias string) personTable {
 	var (
 		IDColumn       = postgres.StringColumn("id")
 		NameColumn     = postgres.StringColumn("name")
@@ -53,7 +66,7 @@ func newPersonTableImpl(schemaName, tableName string) personTable {
 	)
 
 	return personTable{
-		Table: postgres.NewTable(schemaName, tableName, allColumns...),
+		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
 		ID:   IDColumn,
