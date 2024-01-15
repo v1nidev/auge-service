@@ -1,12 +1,15 @@
 package database
 
 import (
-	"os"
 	"fmt"
+	"os"
+
 	"database/sql"
+
 	_ "github.com/lib/pq"
 )
 
+//go:generate go run gen.go
 func Open() (*sql.DB, error) {
 	dbConnectionString := fmt.Sprintf(
 		"host=db port=5432 user=%s dbname=%s password=%s sslmode=disable",
